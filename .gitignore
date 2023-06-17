@@ -1,0 +1,6 @@
+venv
+.idea
+*.pyc
+**/.ipynb_checkpoints
+**/*.csv
+**/*metadata.json
