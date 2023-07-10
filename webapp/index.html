@@ -18,71 +18,71 @@
              aria-valuemin="0" aria-valuemax="100"></div>
     </div>
     <div id="chart"></div>
+    <div id="forecastTable"></div>
+
 </div>
 
 <script>
     $("#fetchData").click(function () {
-                        fetchData();
-
         $("#progress").show();
         $("#progress-bar").css("width", "0%").text("Fetching weather forecast for the next 7 days...");
-
+        timewait = 1;
         new Promise(resolve => {
             setTimeout(() => {
                 $("#progress-bar").css("width", "10%").text("Fetching weather forecast for the next 7 days...");
                 resolve();
-            }, 1000);
+            }, timewait);
         }).then(() => new Promise(resolve => {
             setTimeout(() => {
                 $("#progress-bar").css("width", "20%").text("Fetching weather forecast for the next 7 days...");
                 resolve();
-            }, 1000);
+            }, timewait);
         })).then(() => new Promise(resolve => {
             setTimeout(() => {
                 $("#progress-bar").css("width", "30%").text("Fetching weather forecast for the next 7 days...");
                 resolve();
-            }, 1000);
+            }, timewait);
         })).then(() => new Promise(resolve => {
             setTimeout(() => {
                 $("#progress-bar").css("width", "40%").text("Fetching weather forecast for the next 7 days...");
                 resolve();
-            }, 1000);
+            }, timewait);
         }))
             .then(() => new Promise(resolve => {
                 setTimeout(() => {
                     $("#progress-bar").css("width", "50%").text("Predicting bicycle count...");
                     resolve();
-                }, 1000);
+                }, timewait);
             }))
             .then(() => new Promise(resolve => {
                 setTimeout(() => {
                     $("#progress-bar").css("width", "60%").text("Predicting bicycle count...");
                     resolve();
-                }, 1000);
+                }, timewait);
             }))
             .then(() => new Promise(resolve => {
                 setTimeout(() => {
                     $("#progress-bar").css("width", "70%").text("Predicting bicycle count...");
                     resolve();
-                }, 1000);
+                }, timewait);
             }))
             .then(() => new Promise(resolve => {
                 setTimeout(() => {
                     $("#progress-bar").css("width", "80%").text("Predicting bicycle count...");
                     resolve();
-                }, 1000);
+                }, timewait);
             }))
             .then(() => new Promise(resolve => {
                 setTimeout(() => {
                     $("#progress-bar").css("width", "90%").text("Predicting bicycle count...");
                     resolve();
-                }, 1000);
+                }, timewait);
             }))
             .then(() => new Promise(resolve => {
                 setTimeout(() => {
                     $("#progress-bar").css("width", "100%").text("Predicting bicycle count...");
                     resolve();
-                }, 1000);
+                }, timewait);
             }))
             .then(() => {
                 $("#progress").fadeOut(500);
@@ -91,9 +91,9 @@
     });
 
     function fetchData() {
-        $.get("http://localhost:8080/forecast", function (data) {
-            let dates = data.map(item => item.date);
-            let counts = data.map(item => item.bicycle_count);
+        $.get("http://localhost:8080/forecast", function (input_data) {
+            let dates = input_data.map(item => item.date);
+            let counts = input_data.map(item => item.bicycle_count);
 
             var data = [{
                 x: dates,
@@ -112,6 +112,14 @@
             };
 
             Plotly.newPlot('chart', data, layout);
+
+            let tableHtml = '<table class="table"><thead><tr><th>Date</th><th>Min Temp</th><th>Max Temp</th><th>Avg Temp</th><th>Rain</th><th>Sun Hours</th><th>Cloud Cover</th><th>Bicycle Count</th></tr></thead><tbody>';
+            for (let item of input_data) {
+                tableHtml += `<tr><td>${item['date']}</td><td>${item['min_temp']}</td><td>${item['max_temp']}</td><td>${item['avg_temp']}</td><td>${item['rain']}</td><td>${item['sun_hours']}</td><td>${item['cloud_cover']}</td><td>${item['bicycle_count']}</td></tr>`;
+            }
+            tableHtml += '</tbody></table>';
+
+            $("#forecastTable").html(tableHtml);
         });
     }
 </script>

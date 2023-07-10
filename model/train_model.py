@@ -1,4 +1,5 @@
 import argparse
+import logging
 
 import numpy as np
 import pandas as pd
@@ -38,7 +39,20 @@ def prepare_data(df: pd.DataFrame) -> pd.DataFrame:
     else:
         print("There are no missing dates, continuing")
 
-    return df
+    aggregation_functions = {'datum': 'first',
+                             'min-temp': 'first',
+                             'max-temp': 'first',
+                             'avg-temp': 'first',
+                             'niederschlag': 'first',
+                             'bewoelkung': 'first',
+                             'sonnenstunden': 'first',
+                             'gesamt': 'sum'}
+
+    aggregated_df = df.groupby(df['datum']).aggregate(aggregation_functions)
+    # Assuming 'datum' column is in datetime format
+    aggregated_df['monat'] = aggregated_df['datum'].dt.month
+
+    return aggregated_df
 
 class ModelInput:
     def __init__(self, monat, min_temp, max_temp, avg_temp, niederschlag, bewoelkung, sonnenstunden):
@@ -95,6 +109,7 @@ def save_model(model, file_name: str):
 
 
 def main():
+    logging.basicConfig(level=logging.INFO)
     argparser = argparse.ArgumentParser(description='Train a model to predict bicycle counts')
     argparser.add_argument('--inputdata', help='input data file name', required=True)
     argparser.add_argument('--model', help='output file name', default='munich-bicycle-prediction-model.joblib')
@@ -104,7 +119,10 @@ def main():
     df = load_data(args.inputdata)
     df = prepare_data(df)
     X_train, y_train, X_test, y_test = split_train_test(df)
+    logging.info(f"Training data shape: X_train: {X_train.shape} y_train: {y_train.shape}")
     model = train_model(X_train, y_train)
+
+    logging.info(f"Testing data shape: X_test: {X_test.shape} y_test: {y_test.shape}")
     evaluate_model_weighted_absolute_percentage_error(model, X_test, y_test)
     save_model(model, args.model)
 

@@ -34,7 +34,7 @@ class Forecast(BaseModel):
 
 client = OpenMeteoClient()
 
-model = load_model('munich-bicycle-prediction-model.joblib')
+model = load_model('../model/munich-bicycle-prediction-model.joblib')
 
 @app.get("/forecast", response_model=List[Forecast])
 async def get_forecast():
@@ -51,7 +51,7 @@ async def get_forecast():
                                  sonnenstunden=round(entry['sun_hours'],1),
                                  bewoelkung=round(entry['cloud_cover'],1))
         bicycle_prediction = model.predict([model_input.to_list()])
-        entry['bicycle_count'] = int(bicycle_prediction[0])
+        entry['bicycle_count'] = int(bicycle_prediction[0] * 1.5)
         output.append(Forecast(**entry))
 
     return output
