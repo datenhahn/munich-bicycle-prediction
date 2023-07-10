@@ -1,0 +1,1 @@
+"""The openmeteo package provides a client for the OpenMeteo API."""
