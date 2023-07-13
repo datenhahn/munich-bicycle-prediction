@@ -54,24 +54,8 @@ def prepare_data(df: pd.DataFrame) -> pd.DataFrame:
 
     return aggregated_df
 
-class ModelInput:
-    def __init__(self, monat, min_temp, max_temp, avg_temp, niederschlag, bewoelkung, sonnenstunden):
-        self.monat = monat
-        self.min_temp = min_temp
-        self.max_temp = max_temp
-        self.avg_temp = avg_temp
-        self.niederschlag = niederschlag
-        self.bewoelkung = bewoelkung
-        self.sonnenstunden = sonnenstunden
-
-    def to_list(self):
-        return [self.monat, self.min_temp, self.max_temp, self.avg_temp, self.niederschlag, self.bewoelkung, self.sonnenstunden]
-    def __repr__(self):
-        return f"InputFeatures(monat={self.monat}, min_temp={self.min_temp}, max_temp={self.max_temp}, avg_temp={self.avg_temp}, niederschlag={self.niederschlag}, bewoelkung={self.bewoelkung}, sonnenstunden={self.sonnenstunden})"
 
 def split_train_test(df: pd.DataFrame):
-    from sklearn.linear_model import LinearRegression
-
     # Define features and target variables
     features = ['monat', 'min-temp', 'max-temp', 'avg-temp', 'niederschlag', 'bewoelkung', 'sonnenstunden']
     target = 'gesamt'

@@ -1,17 +1,15 @@
-import joblib
+import datetime
+from os.path import dirname, abspath
+from typing import List
+
 import uvicorn as uvicorn
 from fastapi import FastAPI
-from typing import List
 from pydantic import BaseModel
-import datetime
-
 from starlette.middleware.cors import CORSMiddleware
+from starlette.responses import FileResponse
 
-from model.train_model import ModelInput
+from model.model_wrapper import BicyclePredictionModelWrapper, InputFeatures
 from openmeteo.meteo import OpenMeteoClient, MUNICH_LAT, MUNICH_LON
-
-def load_model(file_name: str):
-    return joblib.load(file_name)
 
 app = FastAPI()
 
@@ -33,9 +31,12 @@ class Forecast(BaseModel):
     bicycle_count: int
 
 client = OpenMeteoClient()
+DIR = abspath(dirname(dirname(__file__)))
+model = BicyclePredictionModelWrapper(DIR + '/model/munich-bicycle-prediction-model.joblib')
 
-model = load_model('../model/munich-bicycle-prediction-model.joblib')
-
+@app.get("/")
+async def read_index():
+    return FileResponse(DIR + '/webapp/static/index.html')
 @app.get("/forecast", response_model=List[Forecast])
 async def get_forecast():
 
@@ -43,15 +44,15 @@ async def get_forecast():
     output = []
     for entry in weather_forecast:
         parsed_date = datetime.datetime.fromisoformat(entry['date']).date()
-        model_input = ModelInput(monat=parsed_date.month,
-                                 min_temp=round(entry['min_temp'],1),
-                                 max_temp=round(entry['max_temp'],1),
-                                 avg_temp=round(entry['avg_temp'],1),
-                                 niederschlag=round(entry['rain'],1),
-                                 sonnenstunden=round(entry['sun_hours'],1),
-                                 bewoelkung=round(entry['cloud_cover'],1))
-        bicycle_prediction = model.predict([model_input.to_list()])
-        entry['bicycle_count'] = int(bicycle_prediction[0] * 1.5)
+        model_input = InputFeatures(monat=parsed_date.month,
+                                 min_temp=entry['min_temp'],
+                                 max_temp=entry['max_temp'],
+                                 avg_temp=entry['avg_temp'],
+                                 niederschlag=entry['rain'],
+                                 sonnenstunden=entry['sun_hours'],
+                                 bewoelkung=entry['cloud_cover'])
+        bicycle_prediction = model.predict(model_input)
+        entry['bicycle_count'] = bicycle_prediction
         output.append(Forecast(**entry))
 
     return output
