@@ -29,5 +29,3 @@ def test_integration_should_download_and_parse_data_when_called_with_location_of
         parsed_date = datetime.fromisoformat(entry['date']).date()
         assert parsed_date >= datetime.today().date() and parsed_date <= datetime.today().date() + timedelta(days=6)
 
-    with open('test_data.json', 'w') as f:
-        f.write(json.dumps(weather_data))
