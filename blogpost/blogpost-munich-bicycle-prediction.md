@@ -1,3 +1,6 @@
+# Open Data: Predicting Cyclist Traffic in Munich
+
+![](people-cycling.jpg)
 
 ## Project Overview
 

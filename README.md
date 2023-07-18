@@ -2,6 +2,10 @@
 
 This project uses opendata of the city of Munich to predict the expected number of cyclists for a given day using the weather forecast and historic data.
 
+Blogpost:
+
+https://medium.com/@jonas.hahn/open-data-predicting-cyclist-traffic-in-munich-4acf1c11c0ed
+
 ## Getting Started
 
 To run the webapp via docker execute the following commands:
