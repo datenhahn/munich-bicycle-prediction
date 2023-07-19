@@ -132,11 +132,6 @@ Linear regression is a statistical tool used for predicting the relationship bet
 
 The Mean Absolute Percentage Error (MAPE) and Weighted Absolute Percentage Error (WAPE) were used as the evaluation metrics for our model, and they returned appreciable results.
 
-```
-Mean Absolute Percentage Error (MAPE): 34.24268051883111
-Weighted Absolute Percentage Error (WAPE): 25.88971467864659
-```
-
 ![](model01-linear-regression.png)
 
 ### Random Forest Regressor
@@ -144,11 +139,6 @@ Weighted Absolute Percentage Error (WAPE): 25.88971467864659
 We then turned to a Random Forest Regressor, a powerful ensemble learning method that operates by constructing multiple decision trees at training time and outputting the mean prediction of the individual trees. It has the potential to achieve higher accuracy and overcome overfitting problems that could possibly trouble a single decision tree.
 
 This model did not perform better than the Linear Regression model, and therefore the higher complexity of the model was not justified.
-
-```
-Mean Absolute Percentage Error (MAPE): 41.231667858898476
-Weighted Absolute Percentage Error (WAPE): 31.30852682735862
-```
 
 ![](model02-random-forest.png)
 
@@ -158,12 +148,75 @@ Our third contestant was SARIMAX (Seasonal AutoRegressive Integrated Moving Aver
 
 The expectation was that this model would outperform the other two models vastly, but it turned out to perform less well than the Linear Regression model.
 
-```
-Mean Absolute Percentage Error (MAPE): 50.32741015190787
-Weighted Absolute Percentage Error (WAPE): 30.451751608145113
-```
-
 ![](model03-sarimax.png)
+
+### Model comparison and evolution
+
+We tested a couple of hypothesis and different models to find the model and feature combination which fits best for our usecase.
+
+For every test we used the same train and test data, which was split at 2022-01-01. The test data was then used to evaluate the models.
+
+We used the following metrics to evaluate the Model performance as well as other factors as training time and model size.
+
+* **MAPE**: Mean Absolute Percentage Error
+* **WAPE**: Weighted Absolute Percentage Error
+* **Time to train**: Time it takes to train the model
+* **Model size**: Size of the model in MB
+
+The following hypothesis were tested:
+
+* **Hypothesis 1**: The number of cyclists is directly correlated to the weather features, especially the temperature.
+* **Hypothesis 2**: Adding more weather features improves the accuracy of the models.
+
+#### Hypothesis 1: The number of cyclists is directly correlated to the weather features, especially the temperature.
+
+First we trained all our models with only the average temperature, which lead to the following results:
+
+|               | Linear Regression | Random Forest | SARIMAX |
+| ------------- | ----------------- | ------------- | ------- |
+| Time to train | 0.003 s           | 0.6 s         | 50.4 s  |
+| Model size    | 0.0005 MB         | 17 MB         | 274MB   |
+| MAPE          | 38.7%             | 42.2%         | 38.8%   |
+| WAPE          | 38.8%             | 40.7%         | 31.6%   |
+
+In our first run SARIMAX outperforms Linear Regression and Random Forest, but the training time and model size are much higher.
+
+#### Hypothesis 2: Adding more weather features improves the accuracy of the models.
+
+Adding more features improved the model by some percentage points, but the training time and model size increased significantly.
+
+As the absolute times still are very low there is no downside in adding the additional features.
+
+|               | Linear Regression | Random Forest | SARIMAX |
+| ------------- |-------------------|---------------|---------|
+| Time to train | 0.004 s           | 1.9 s         | 188.0 s |
+| Model size    | 0.0007 MB         | 80 MB         | 274MB   |
+| MAPE          | 37.6%             | 39.0%         | 40.6%   |
+| WAPE          | 35.9%             | 37.4%         | 24.1%   |
+
+#### Further model improvements
+
+When comparing the model output with the actual data in a graph we realized that the model often continously underestimates all values. This probably is due the model also being trained with older data where absolut cyclist numbers were lower.
+
+So we developed the idea of adding a constant factor to the model output to compensate for this.
+
+##### Hypothesis 3: Adding a constant factor to the model output improves the accuracy of the models.
+
+Interstingly applying the constant factor had quite some impact on model accuracy,
+as the error lowered significantly for all models. The smallest gain was perceived
+with the SARIMAX model. Probably the model already compensates for this effect.
+
+For Linear Regression and Random Forest the constant factor applied was 1.4, for
+SARIMAX interestingly a factor of 0.95 performed best.
+
+|               | Linear Regression | Random Forest | SARIMAX |
+|---------------|-------------------|---------------|---------|
+| Time to train | 0.004 s           | 1.9 s         | 188.0 s |
+| Model size    | 0.0007 MB         | 80 MB         | 274MB   |
+| MAPE          | 37.6%             | 39.0%         | 40.6%   |
+| MAPE (factor) | 34.4%             | 36.5%         | 38.4%   |
+| WAPE          | 35.9%             | 37.4%         | 24.1%   |
+| WAPE (factor) | 26.7%             | 29.0%         | 24.0%   |
 
 ### Model Choice: Linear Regression
 
@@ -177,7 +230,7 @@ Having evaluated all the three models, the choice fell upon the Linear Regressio
 
 * Predictive Power: Despite its simplicity, Linear Regression managed to capture the main trend of our data with decent precision, and even outperforming the more complex models.
 
-All things considered, the Linear Regression model provided a reasonable compromise between simplicity and predictive power for this task, and hence, was chosen as the final model for predicting bike counts at the Munich counting stations. Future work may explore more sophisticated models or data preprocessing techniques to enhance the predictive accuracy.
+All things considered, while the SARIMAX model outperformed Linear Regression slightly, the Linear Regression model provided a reasonable compromise between simplicity and predictive power for this task, and hence, was chosen as the final model for predicting bike counts at the Munich counting stations. Future work may explore more sophisticated models or data preprocessing techniques to enhance the predictive accuracy.
 
 ## Conclusion
 
